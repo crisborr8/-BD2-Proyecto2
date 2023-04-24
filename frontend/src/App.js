@@ -1,25 +1,34 @@
-import logo from './logo.svg';
+import React, { useState } from "react";
+import Reportes from "./pages/Reportes";
+import InsertarDatos from "./pages/Insertar";
 import './App.css';
 
-function App() {
+const App = () => {
+  const [activeTab, setActiveTab] = useState("reportes");
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div>
+      <ul>
+        <li
+          onClick={() => handleTabChange("reportes")}
+          className={activeTab === "reportes" ? "active" : ""}
         >
-          Learn React
-        </a>
-      </header>
+          Reportes
+        </li>
+        <li
+          onClick={() => handleTabChange("insertarDatos")}
+          className={activeTab === "insertarDatos" ? "active" : ""}
+        >
+          Insertar Datos
+        </li>
+      </ul>
+      {activeTab === "reportes" ? <Reportes /> : <InsertarDatos />}
     </div>
   );
-}
+};
 
 export default App;
