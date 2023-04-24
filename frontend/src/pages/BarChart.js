@@ -1,35 +1,76 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
+import ReactApexChart from 'react-apexcharts';
 
-const BarChart = ({ data }) => {
-  if (!data) {
-    return <div>No hay datos disponibles</div>;
+class BarChart extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      series: [
+        {
+          data: props.data.map(item => {
+            return item.valor;
+          })
+        }
+      ],
+      options: {
+        chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            borderRadius: 4,
+            horizontal: true
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        xaxis: {
+          categories: props.data.map(item => {
+            return item.dato;
+          })
+        }
+      }
+    };
   }
 
-  // Configuración de la gráfica
-  const chartData = {
-    labels: data.map(item => item.dato),
-    datasets: [
-      {
-        label: 'Valores',
-        data: data.map(item => item.valor),
-        backgroundColor: 'rgba(75,192,192,0.2)', // Color de fondo de las barras
-        borderColor: 'rgba(75,192,192,1)', // Color del borde de las barras
-        borderWidth: 1, // Ancho del borde de las barras
-      },
-    ],
-  };
+  componentDidUpdate(prevProps) {
+    if (this.props.data !== prevProps.data) {
+      this.setState({
+        series: [
+          {
+            data: this.props.data.map(item => {
+              return item.valor;
+            })
+          }
+        ],
+        options: {
+          ...this.state.options,
+          xaxis: {
+            ...this.state.options.xaxis,
+            categories: this.props.data.map(item => {
+              return item.dato;
+            })
+          }
+        }
+      });
+    }
+  }
 
-  const chartOptions = {
-    scales: {
-      y: {
-        beginAtZero: true, // Comenzar el eje Y desde 0
-        max: Math.max(...data.map(item => item.valor)) + 10, // Establecer el valor máximo del eje Y
-      },
-    },
-  };
-
-  return <Bar data={chartData} options={chartOptions} />;
-};
+  render() {
+    return (
+      <div id="chart">
+        <ReactApexChart
+          options={this.state.options}
+          series={this.state.series}
+          type="bar"
+          height={350}
+        />
+      </div>
+    );
+  }
+}
 
 export default BarChart;

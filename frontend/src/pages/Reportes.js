@@ -4,14 +4,21 @@ import "./Reportes.css"; // Importa el archivo de estilos CSS
 
 const Reportes = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
+    const [cb_tipoReporte, cb_TipoReporte] = useState("");
+
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoReporte, setTipoReporte] = useState("");
-    const [datoReporte, setDatoReporte] = useState(null);
+    const [data, setData] = useState([]);
 
     const obtenerDatos = async () => {
         try {
             var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
             setBaseDatos(datos)
+            datos = [];
+            for (var i = 1; i <= 8; i++) {
+                datos.push("Reporte " + i);
+            }
+            setTipoReporte(datos)
         } catch (error) {
             console.error(error);
         }
@@ -25,11 +32,21 @@ const Reportes = () => {
     };
 
     const handleTipoReporteChange = (e) => {
-        setTipoReporte(e.target.value);
+        cb_TipoReporte(e.target.value);
     };
 
     const generarGrafica = async () => {
-
+        if (cb_baseDatos !== "" && cb_tipoReporte !== "") {
+            const datosGrafica = [
+                { dato: 'Dato 1', valor: 10 },
+                { dato: 'Dato 2', valor: 20 },
+                { dato: 'Dato 3', valor: 15 },
+                { dato: 'Dato 4', valor: 25 },
+            ];
+            console.log(data)
+            setData(datosGrafica);
+            console.log(data)
+        }
     };
 
     return (
@@ -51,17 +68,26 @@ const Reportes = () => {
                 })()}
             </select>
 
-            <label htmlFor="tipoReporte">Tipo de Reporte:</label>
-            <select id="tipoReporte" value={tipoReporte} onChange={handleTipoReporteChange}>
+            <label htmlFor="cb_tipoReporte">Tipo de Reporte:</label>
+            <select id="cb_tipoReporte" value={cb_tipoReporte} onChange={handleTipoReporteChange}>
                 <option value="">Seleccione un reporte</option>
-                {/* Opciones para el tipo de reporte */}
+                {(() => {
+                const options = [];
+                for (let i = 0; i < tipoReporte.length; i++) {
+                    options.push(
+                    <option key={i} value={tipoReporte[i]}>
+                        {tipoReporte[i]}
+                    </option>
+                    );
+                }
+                return options;
+                })()}
             </select>
 
             <button onClick={generarGrafica}>Generar Gráfica</button>
 
-            {/* Contenedor para la gráfica */}
             <div className="chart-container">
-            <BarChart data={datoReporte} />
+                <BarChart data={data} />
             </div>
         </div>
     );

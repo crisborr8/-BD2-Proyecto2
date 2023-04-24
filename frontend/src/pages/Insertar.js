@@ -42,7 +42,7 @@ const Insertar = () => {
     };
 
     const Insertar_dato = async () => {
-        alert("a")
+        alert("insertar")
         try {
             const datos = {
                 baseDatos,
