@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BarChart from './BarChart';
-import "./Reportes.css"; // Importa el archivo de estilos CSS
+import "./Reportes.css"; 
+import Modal from "react-modal"; 
 
 const Reportes = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
@@ -9,6 +10,8 @@ const Reportes = () => {
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoReporte, setTipoReporte] = useState("");
     const [data, setData] = useState([]);
+
+    const [modalIsOpen, setModalIsOpen] = useState(false); 
 
     const obtenerDatos = async () => {
         try {
@@ -43,11 +46,15 @@ const Reportes = () => {
                 { dato: 'Dato 3', valor: 15 },
                 { dato: 'Dato 4', valor: 25 },
             ];
-            console.log(data)
             setData(datosGrafica);
-            console.log(data)
+        } else {
+            setModalIsOpen(true);
         }
     };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    }
 
     return (
         <div className="report-container">
@@ -85,6 +92,12 @@ const Reportes = () => {
             </select>
 
             <button onClick={generarGrafica}>Generar Gráfica</button>
+
+            <Modal isOpen={modalIsOpen} onRequestClose={closeModal} style={{content: {height: '200px'}}}>
+                <h2>Error</h2>
+                <p>Por favor seleccione una base de datos y un tipo de reporte.</p>
+                <button onClick={closeModal}>Cerrar</button>
+            </Modal>
 
             <div className="chart-container">
                 <BarChart data={data} />

@@ -21,17 +21,14 @@
     margin-bottom: 20px;
   }
   
-  /* Estilos específicos para los ComboBox */
   select {
     height: 40px;
   }
   
-  /* Estilos específicos para los campos de descripción */
   textarea {
     height: 100px;
   }
   
-  /* Estilos para mostrar u ocultar los campos de logactividad y loghabitacion */
   .log-fields {
     display: none;
   }

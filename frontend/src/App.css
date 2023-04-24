@@ -1,11 +1,10 @@
 body {
-  background-color: #F5EFEF; /* Cambia el color de fondo a tu preferencia */
-  font-family: Arial, sans-serif; /* Cambia el tipo de letra a tu preferencia */
+  background-color: #F5EFEF; 
+  font-family: Arial, sans-serif; 
 }
 
-/* Estilo de los encabezados h1 y h2 */
 h1, h2 {
-  color: #2E2E2E; /* Cambia el color del texto a tu preferencia */
+  color: #2E2E2E; 
 }
 
 ul {
@@ -34,7 +33,7 @@ li:hover {
   background-color: #2196f3;
   color: #fff;
 }
-/* Estilos para el contenido de las pestañas */
+
 .content {
   margin-top: 20px;
   padding: 20px;
