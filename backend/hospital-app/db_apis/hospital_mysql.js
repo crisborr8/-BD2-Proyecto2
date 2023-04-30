@@ -131,7 +131,7 @@ async function insertLog_Room(log_room) {
             try {
                 const rows = await mysqlDataBase.simpleExecute(insertLog_RoomQ,
                     [log_room.id_habitacion, log_room.descripcion,
-                        log_room.fecha + " 00:00:00"  ])
+                        log_room.fecha  ])
                 resolve( { "status" : true })
             } catch (e) {
                 e.statusRes = status.BAD_REQUEST
@@ -148,7 +148,7 @@ async function insertLog_Activity(log_activity) {
             try {
                 const rows = await mysqlDataBase.simpleExecute(insertLog_ActivityQ,
                     [ log_activity.descripcion, log_activity.id_habitacion,
-                    log_activity.id_paciente, log_activity.fecha+ " 00:00:00"])
+                    log_activity.id_paciente, log_activity.fecha])
                 resolve( { "status" : true })
             } catch (e) {
                 e.statusRes = status.BAD_REQUEST
@@ -292,7 +292,7 @@ async function getQuery9() {
 
 
 const getPatieentsQ = `
-select *
+select idPaciente as id_paciente, genero, edad
 from Paciente
 limit `
 

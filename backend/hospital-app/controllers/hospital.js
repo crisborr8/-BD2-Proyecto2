@@ -12,10 +12,10 @@ const insert = async function (req, res, next) {
             switch (req.body.base) {
                 case "mysql":
                     switch (req.body.tipo_registro) {
-                        case 1:
+                        case 0:
                             result = await hospital.insertLog_Activity(req.body)
                             break;
-                        case 2:
+                        case 1:
                             result = await  hospital.insertLog_Room(req.body)
                             break;
                         default:
@@ -27,10 +27,10 @@ const insert = async function (req, res, next) {
                     break;
                 case "cassandra":
                     switch (req.body.tipo_registro) {
-                        case 1:
+                        case 0:
                             result = await hospital_cassandra.insertLog_Activity(req.body)
                             break;
-                        case 2:
+                        case 1:
                             result = await  hospital_cassandra.insertLog_Room(req.body)
                             break;
                         default:

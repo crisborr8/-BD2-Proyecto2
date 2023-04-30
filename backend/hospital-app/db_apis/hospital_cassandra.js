@@ -105,7 +105,7 @@ async function insertLog_Room(log_room){
     return new Promise(async (resolve, reject) => {
             try {
                 await cassandra_db.executeQuery(insert_room_log, [ log_room.id_habitacion,
-                    log_room.fecha, log_room.descripcion ])
+                    log_room.fecha , log_room.descripcion ])
                 resolve( { "status" : true })
             } catch (e) {
                 e.statusRes = status.BAD_REQUEST
