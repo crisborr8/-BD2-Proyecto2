@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise')
 const cassandra = require("cassandra-driver");
+const redis = require("redis")
 
 const pool = mysql.createPool({
     host: process.env.MYSQL_HOST || "localhost",
@@ -15,6 +16,11 @@ const pool = mysql.createPool({
 
 const auth = new cassandra.auth.PlainTextAuthProvider('cassandra', 'cassandra')
 
+const redisClient = redis.createClient({
+    database: 1,
+    url: "redis://44.211.212.12:6379/1"
+})
 
 module.exports.pool = pool
 module.exports.cassandra_auth = auth
+module.exports.redisClient = redisClient

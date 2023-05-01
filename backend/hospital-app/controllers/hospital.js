@@ -2,6 +2,7 @@ const status = require('http-status')
 const hospital = require('../db_apis/hospital_mysql')
 
 const hospital_cassandra = require("../db_apis/hospital_cassandra");
+const hospital_redis = require("../db_apis/hospital_redis")
 
 
 const insert = async function (req, res, next) {
@@ -14,9 +15,11 @@ const insert = async function (req, res, next) {
                     switch (req.body.tipo_registro) {
                         case 0:
                             result = await hospital.insertLog_Activity(req.body)
+                            await hospital_redis.insertLog("Insert Log Activity", "MYSQL")
                             break;
                         case 1:
                             result = await  hospital.insertLog_Room(req.body)
+                            await hospital_redis.insertLog("Insert Log Room", "MYSQL")
                             break;
                         default:
                             let e = new Error("mala elección de insersión chavo :v")
@@ -29,9 +32,11 @@ const insert = async function (req, res, next) {
                     switch (req.body.tipo_registro) {
                         case 0:
                             result = await hospital_cassandra.insertLog_Activity(req.body)
+                            await hospital_redis.insertLog("Insert Log Activity", "CASSANDRA")
                             break;
                         case 1:
                             result = await  hospital_cassandra.insertLog_Room(req.body)
+                            await hospital_redis.insertLog("Insert Log Room", "CASSANDRA")
                             break;
                         default:
                             let e = new Error("mala elección de insersión chavo :v")
@@ -68,6 +73,7 @@ const getReports = async function (req, res, next) {
             let rows = []
             switch (req.body.base) {
                 case "mysql":
+                    await hospital_redis.insertLog("Consulta " + req.body.reporte, "MYSQL")
                     switch (req.body.reporte) {
                         case 1:
                             rows = await hospital.getQuery1()
@@ -105,6 +111,7 @@ const getReports = async function (req, res, next) {
                     }
                 break;
                 case "cassandra":
+                    await hospital_redis.insertLog("Consulta " + req.body.reporte, "CASSANDRA")
                     switch (req.body.reporte) {
                         case 1:
                             rows = await hospital_cassandra.getQuery1()
@@ -174,6 +181,7 @@ const getRooms = async function (req, res, next) {
     return new Promise(async (resolve, reject) => {
         try {
             const rows = await hospital.getRooms()
+            await hospital_redis.insertLog("Consulta Get Rooms", "MYSQL")
             res.status(status.OK).json(rows)
         } catch (e) {
             reject(e)
@@ -187,6 +195,7 @@ const getPatients = async function (req, res, next) {
     return new Promise(async (resolve, reject) => {
         try {
             const rows = await hospital.getPatients(req.params.pag)
+            await hospital_redis.insertLog("Consulta Get Patients", "MYSQL")
             res.status(status.OK).json(rows)
         } catch (e) {
             reject(e)
