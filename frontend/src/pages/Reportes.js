@@ -26,6 +26,7 @@ const Reportes = () => {
             console.error(error);
         }
     };
+
     useEffect(() => {
         obtenerDatos();
     }, []);
@@ -39,18 +40,34 @@ const Reportes = () => {
     };
 
     const generarGrafica = async () => {
-        if (cb_baseDatos !== "" && cb_tipoReporte !== "") {
-            const datosGrafica = [
-                { dato: 'Dato 1', valor: 10 },
-                { dato: 'Dato 2', valor: 20 },
-                { dato: 'Dato 3', valor: 15 },
-                { dato: 'Dato 4', valor: 25 },
-            ];
-            setData(datosGrafica);
+        if (cb_baseDatos !== '' && cb_tipoReporte !== '') {
+          try {
+            const body = JSON.stringify({
+                base: cb_baseDatos.toLowerCase(),
+                reporte: parseInt(cb_tipoReporte.replace("Reporte ", ""))
+            })
+            const response = await fetch('http://35.208.12.68:8069/reporte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body,
+            });
+            const data = await response.json();
+            if (Array.isArray(data)){
+                setData(data);
+            } else {
+                console.error(data)
+                alert("Error inesperado en DB")
+            }
+          } catch (error) {
+            setData([]);
+            console.error(error);
+          }
         } else {
-            setModalIsOpen(true);
+          setModalIsOpen(true);
         }
-    };
+      };
 
     const closeModal = () => {
         setModalIsOpen(false);
