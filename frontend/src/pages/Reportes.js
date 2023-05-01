@@ -3,6 +3,7 @@ import BarChart from './BarChart';
 import "./Reportes.css"; 
 import Modal from "react-modal"; 
 
+
 const Reportes = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
     const [cb_tipoReporte, cb_TipoReporte] = useState("");
@@ -45,12 +46,12 @@ const Reportes = () => {
         if (cb_baseDatos !== '' && cb_tipoReporte !== '') {
           try {
             const tiempoInicio = performance.now(); // Registrar el tiempo de inicio
-            
+            console.log(process.env.REACT_APP_API_URL)
             const body = JSON.stringify({
                 base: cb_baseDatos.toLowerCase(),
                 reporte: parseInt(cb_tipoReporte.replace("Reporte ", ""))
             })
-            const response = await fetch('http://35.208.12.68:8069/reporte', {
+            const response = await fetch(process.env.REACT_APP_API_URL + '/reporte', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

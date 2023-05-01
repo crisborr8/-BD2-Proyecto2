@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import './Insertar.css';
 import Modal from "react-modal"; 
 
+
 const Insertar = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
     const [cb_habitacion, cb_setHabitacion] = useState("");
@@ -23,7 +24,7 @@ const Insertar = () => {
 
     const obtenerDatos = async () => {
         try {
-            var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
+            var datos = ["MongoDB", "Cassandra", "MySql"];
             setBaseDatos(datos)
             setPagina(["1", "2", "3", "4", "5"])
         } catch (error) {
@@ -67,7 +68,7 @@ const Insertar = () => {
 
     const setPacientePage = async (e) => {
         try {
-            const response = await fetch('http://35.208.12.68:8069/GetPacientes/'+e.target.value, {
+            const response = await fetch(process.env.REACT_APP_API_URL + '/GetPacientes/'+e.target.value, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -88,7 +89,7 @@ const Insertar = () => {
 
     const getHabitacionPaciente = async (e) => {
         try {
-            const response = await fetch('http://35.208.12.68:8069/GetHabitaciones/', {
+            const response = await fetch(process.env.REACT_APP_API_URL + '/GetHabitaciones', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -119,7 +120,6 @@ const Insertar = () => {
             else if (tipoRegistro === "loghabitacion" && (cb_habitacion === "" || descripcion === "")){
                 setModalIsOpen_descripcion(true);
             } else {
-                alert("insertar")
                 try {
                     let body = {}
                     const fechaActual = new Date();
@@ -146,7 +146,7 @@ const Insertar = () => {
                             "descripcion": descripcion
                         }
                     }
-                    const response = await fetch('http://35.208.12.68:8069/insertar', {
+                    const response = await fetch(process.env.REACT_APP_API_URL + '/insertar', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -156,6 +156,7 @@ const Insertar = () => {
                     const data = await response.json();
                     if (data["status"]){
                         setModalIsOpen_insertarExito(true);
+                        setDescripcion("")
                     } else{
                         setModalIsOpen_insertarError(true);
                     }
