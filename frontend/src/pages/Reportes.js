@@ -9,6 +9,7 @@ const Reportes = () => {
 
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoReporte, setTipoReporte] = useState("");
+    const [tiempoDeEspera, setTiempoDeEspera] = useState("0");
     const [data, setData] = useState([]);
 
     const [modalIsOpen, setModalIsOpen] = useState(false); 
@@ -40,8 +41,11 @@ const Reportes = () => {
     };
 
     const generarGrafica = async () => {
+        setTiempoDeEspera(0)
         if (cb_baseDatos !== '' && cb_tipoReporte !== '') {
           try {
+            const tiempoInicio = performance.now(); // Registrar el tiempo de inicio
+            
             const body = JSON.stringify({
                 base: cb_baseDatos.toLowerCase(),
                 reporte: parseInt(cb_tipoReporte.replace("Reporte ", ""))
@@ -53,6 +57,11 @@ const Reportes = () => {
                 },
                 body: body,
             });
+            
+            const tiempoFinal = performance.now(); // Registrar el tiempo de finalización
+            setTiempoDeEspera(tiempoFinal - tiempoInicio); // Calcular el tiempo de espera
+
+            
             const data = await response.json();
             if (Array.isArray(data)){
                 setData(data);
@@ -116,6 +125,10 @@ const Reportes = () => {
                 <button onClick={closeModal}>Cerrar</button>
             </Modal>
 
+            <br></br>
+            <br></br>
+            <h3>Tiempo de consulta: {tiempoDeEspera} ms</h3>
+            <br></br>
             <div className="chart-container">
                 <BarChart data={data} />
             </div>

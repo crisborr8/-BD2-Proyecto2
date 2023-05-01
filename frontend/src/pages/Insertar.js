@@ -18,6 +18,8 @@ const Insertar = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen_actividad, setModalIsOpen_actividad] = useState(false);
     const [modalIsOpen_descripcion, setModalIsOpen_descripcion] = useState(false);
+    const [modalIsOpen_insertarError, setModalIsOpen_insertarError] = useState(false);
+    const [modalIsOpen_insertarExito, setModalIsOpen_insertarExito] = useState(false);
 
     const obtenerDatos = async () => {
         try {
@@ -119,28 +121,48 @@ const Insertar = () => {
             } else {
                 alert("insertar")
                 try {
-                    const datos = {
-                        baseDatos,
-                        tipoRegistro,
-                        habitacion,
-                        paciente,
-                        descripcion
-                    };
-                    const response = await fetch("https://localhost:8080/insertar", {
-                        method: "POST",
-                        headers: {
-                        "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(datos),
-                    });
-                    if (!response.ok) {
-                        throw new Error("Error al obtener el reporte");
+                    let body = {}
+                    const fechaActual = new Date();
+                    const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+                    if (tipoRegistro === "logactividad"){
+                        body = {
+                            "base": cb_baseDatos.toLowerCase(),
+                            "tipo_registro": 0,
+                            "id_paciente": parseInt(cb_paciente),
+                            "edad": parseInt(paciente.find(p => p.id_paciente === parseInt(cb_paciente),).edad),
+                            "fecha": fechaFormateada,
+                            "habitacion": habitacion.find(p => p.id_habitacion === parseInt(cb_habitacion)).habitacion,
+                            "id_habitacion": parseInt(cb_habitacion),
+                            "genero": paciente.find(p => p.id_paciente === parseInt(cb_paciente)).genero,
+                            "descripcion": descripcion
+                        }
+                    } else {
+                        body = {
+                            "base": cb_baseDatos.toLowerCase(),
+                            "tipo_registro": 1,  
+                            "fecha": fechaFormateada,
+                            "habitacion": habitacion.find(p => p.id_habitacion === parseInt(cb_habitacion)).habitacion,
+                            "id_habitacion": parseInt(cb_habitacion),
+                            "descripcion": descripcion
+                        }
                     }
+                    const response = await fetch('http://35.208.12.68:8069/insertar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body),
+                    });
                     const data = await response.json();
-                    return data;
+                    if (data["status"]){
+                        setModalIsOpen_insertarExito(true);
+                    } else{
+                        setModalIsOpen_insertarError(true);
+                    }
+                    console.log(data)
                 } catch (error) {
                     console.error(error);
-                    throw error;
+                    return []
                 }
             }
         } else {
@@ -158,6 +180,14 @@ const Insertar = () => {
     
     const closeModal_descripcion = () => {
         setModalIsOpen_descripcion(false);
+    }
+    
+    const closeModal_insertarError = () => {
+        setModalIsOpen_insertarError(false);
+    }
+    
+    const closeModal_insertarExito = () => {
+        setModalIsOpen_insertarExito(false);
     }
 
     return (
@@ -196,7 +226,7 @@ const Insertar = () => {
                     for (let i = 0; i < habitacion.length; i++) {
                         options.push(
                         <option key={i} value={habitacion[i].id_habitacion}>
-                            {habitacion[i].habitacion}
+                            {habitacion[i].id_habitacion}-{habitacion[i].habitacion}
                         </option>
                         );
                     }
@@ -228,7 +258,7 @@ const Insertar = () => {
                     for (let i = 0; i < paciente.length; i++) {
                         options.push(
                         <option key={i} value={paciente[i].id_paciente}>
-                            {paciente[i].id_paciente} - {paciente[i].genero} - {paciente[i].edad}
+                            {paciente[i].id_paciente}-{paciente[i].genero}-{paciente[i].edad}
                         </option>
                         );
                     }
@@ -254,8 +284,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < habitacion.length; i++) {
                         options.push(
-                        <option key={i} value={habitacion[i]}>
-                            {habitacion[i]}
+                        <option key={i} value={habitacion[i].id_habitacion}>
+                            {habitacion[i].id_habitacion}-{habitacion[i].habitacion}
                         </option>
                         );
                     }
@@ -290,6 +320,18 @@ const Insertar = () => {
                 <h2>Error</h2>
                 <p>Por favor seleccione una habitacion e ingrese una descripcion.</p>
                 <button onClick={closeModal_descripcion}>Cerrar</button>
+            </Modal>
+
+            <Modal isOpen={modalIsOpen_insertarExito} onRequestClose={closeModal_insertarExito} style={{content: {height: '200px'}}}>
+                <h2>Exito</h2>
+                <p>El log se ha ingresado con éxito.</p>
+                <button onClick={closeModal_insertarExito}>Cerrar</button>
+            </Modal>
+
+            <Modal isOpen={modalIsOpen_insertarError} onRequestClose={closeModal_insertarError} style={{content: {height: '200px'}}}>
+                <h2>Error</h2>
+                <p>Ha ocurrido un error inesperado, comuniquese con el administrador.</p>
+                <button onClick={closeModal_insertarError}>Cerrar</button>
             </Modal>
         </div>
     );
