@@ -67,7 +67,7 @@ const Reportes = () => {
         } else {
           setModalIsOpen(true);
         }
-      };
+    };
 
     const closeModal = () => {
         setModalIsOpen(false);

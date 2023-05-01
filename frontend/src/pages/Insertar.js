@@ -6,11 +6,13 @@ const Insertar = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
     const [cb_habitacion, cb_setHabitacion] = useState("");
     const [cb_paciente, cb_setPaciente] = useState("");
+    const [cb_pagina, cb_setPagina] = useState("");
 
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoRegistro, setTipoRegistro] = useState("");
     const [habitacion, setHabitacion] = useState("");
     const [paciente, setPaciente] = useState("");
+    const [pagina, setPagina] = useState("");
     const [descripcion, setDescripcion] = useState("");
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -21,6 +23,7 @@ const Insertar = () => {
         try {
             var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
             setBaseDatos(datos)
+            setPagina(["1", "2", "3", "4", "5"])
         } catch (error) {
             console.error(error);
         }
@@ -51,19 +54,58 @@ const Insertar = () => {
         cb_setPaciente(e.target.value);
     };
 
+    const handlePaginaChange = (e) => {
+        cb_setPagina(e.target.value);
+        setPacientePage(e)
+    };
+
     const handleDescripcionChange = (e) => {
         setDescripcion(e.target.value);
     };
 
+    const setPacientePage = async (e) => {
+        try {
+            const response = await fetch('http://35.208.12.68:8069/GetPacientes/'+e.target.value, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            const data = await response.json();
+            if (Array.isArray(data)){
+                setPaciente(data)
+            } else {
+                console.error(data)
+                return []
+            }
+        } catch (error) {
+            console.error(error);
+            return []
+        }
+    }
+
     const getHabitacionPaciente = async (e) => {
-        if (e === "logactividad"){
-            var datos = ["Habitacion a1", "Habitacion a2", "Habitacion a3", "Habitacion a4"];
-            setHabitacion(datos)
-            datos = ["Paciente 1", "Paciente 2"];
-            setPaciente(datos)
-        } else {
-            datos = ["Habitacion 1", "Habitacion 2", "Habitacion 3", "Habitacion 4"];
-            setHabitacion(datos)
+        try {
+            const response = await fetch('http://35.208.12.68:8069/GetHabitaciones/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            const data = await response.json();
+            if (Array.isArray(data)){
+                if (e === "logactividad"){
+                    setHabitacion(data)
+                } else {
+                    setHabitacion(data)
+                }
+            } else {
+                console.error(data)
+                return []
+            }
+        } catch (error) {
+            console.error(error);
+            return []
         }
     }
 
@@ -153,8 +195,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < habitacion.length; i++) {
                         options.push(
-                        <option key={i} value={habitacion[i]}>
-                            {habitacion[i]}
+                        <option key={i} value={habitacion[i].id_habitacion}>
+                            {habitacion[i].habitacion}
                         </option>
                         );
                     }
@@ -162,6 +204,22 @@ const Insertar = () => {
                     })()}
                 </select>
 
+                <label htmlFor="cb_pagina">Pagina:</label>
+                <select id="cb_pagina" value={cb_pagina} onChange={handlePaginaChange}>
+                    <option value="">Seleccione una pagina para obtener de la DB</option>
+                    {(() => {
+                    const options = [];
+                    for (let i = 0; i < pagina.length; i++) {
+                        options.push(
+                        <option key={i} value={pagina[i]}>
+                            {pagina[i]}
+                        </option>
+                        );
+                    }
+                    return options;
+                    })()}
+                </select>
+                
                 <label htmlFor="cb_paciente">Paciente:</label>
                 <select id="cb_paciente" value={cb_paciente} onChange={handlePacienteChange}>
                     <option value="">Seleccione un paciente</option>
@@ -169,8 +227,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < paciente.length; i++) {
                         options.push(
-                        <option key={i} value={paciente[i]}>
-                            {paciente[i]}
+                        <option key={i} value={paciente[i].id_paciente}>
+                            {paciente[i].id_paciente} - {paciente[i].genero} - {paciente[i].edad}
                         </option>
                         );
                     }
