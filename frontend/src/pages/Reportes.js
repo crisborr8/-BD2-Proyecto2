@@ -17,7 +17,7 @@ const Reportes = () => {
 
     const obtenerDatos = async () => {
         try {
-            var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
+            var datos = ["MongoDB", "Cassandra", "MySql"];
             setBaseDatos(datos)
             datos = [];
             for (var i = 1; i <= 8; i++) {
@@ -45,8 +45,7 @@ const Reportes = () => {
         setTiempoDeEspera(0)
         if (cb_baseDatos !== '' && cb_tipoReporte !== '') {
           try {
-            const tiempoInicio = performance.now(); // Registrar el tiempo de inicio
-            console.log(process.env.REACT_APP_API_URL)
+            const tiempoInicio = performance.now(); 
             const body = JSON.stringify({
                 base: cb_baseDatos.toLowerCase(),
                 reporte: parseInt(cb_tipoReporte.replace("Reporte ", ""))
@@ -58,6 +57,7 @@ const Reportes = () => {
                 },
                 body: body,
             });
+            console.log(body)
             
             const tiempoFinal = performance.now(); // Registrar el tiempo de finalización
             setTiempoDeEspera(tiempoFinal - tiempoInicio); // Calcular el tiempo de espera
@@ -65,6 +65,7 @@ const Reportes = () => {
             
             const data = await response.json();
             if (Array.isArray(data)){
+                console.log(data)
                 setData(data);
             } else {
                 console.error(data)
