@@ -3,19 +3,21 @@ import BarChart from './BarChart';
 import "./Reportes.css"; 
 import Modal from "react-modal"; 
 
+
 const Reportes = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
     const [cb_tipoReporte, cb_TipoReporte] = useState("");
 
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoReporte, setTipoReporte] = useState("");
+    const [tiempoDeEspera, setTiempoDeEspera] = useState("0");
     const [data, setData] = useState([]);
 
     const [modalIsOpen, setModalIsOpen] = useState(false); 
 
     const obtenerDatos = async () => {
         try {
-            var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
+            var datos = ["MongoDB", "Cassandra", "MySql"];
             setBaseDatos(datos)
             datos = [];
             for (var i = 1; i <= 8; i++) {
@@ -26,6 +28,7 @@ const Reportes = () => {
             console.error(error);
         }
     };
+
     useEffect(() => {
         obtenerDatos();
     }, []);
@@ -39,16 +42,41 @@ const Reportes = () => {
     };
 
     const generarGrafica = async () => {
-        if (cb_baseDatos !== "" && cb_tipoReporte !== "") {
-            const datosGrafica = [
-                { dato: 'Dato 1', valor: 10 },
-                { dato: 'Dato 2', valor: 20 },
-                { dato: 'Dato 3', valor: 15 },
-                { dato: 'Dato 4', valor: 25 },
-            ];
-            setData(datosGrafica);
+        setTiempoDeEspera(0)
+        if (cb_baseDatos !== '' && cb_tipoReporte !== '') {
+          try {
+            const tiempoInicio = performance.now(); 
+            const body = JSON.stringify({
+                base: cb_baseDatos.toLowerCase(),
+                reporte: parseInt(cb_tipoReporte.replace("Reporte ", ""))
+            })
+            const response = await fetch(process.env.REACT_APP_API_URL + '/reporte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body,
+            });
+            console.log(body)
+            
+            const tiempoFinal = performance.now(); // Registrar el tiempo de finalización
+            setTiempoDeEspera(tiempoFinal - tiempoInicio); // Calcular el tiempo de espera
+
+            
+            const data = await response.json();
+            if (Array.isArray(data)){
+                console.log(data)
+                setData(data);
+            } else {
+                console.error(data)
+                alert("Error inesperado en DB")
+            }
+          } catch (error) {
+            setData([]);
+            console.error(error);
+          }
         } else {
-            setModalIsOpen(true);
+          setModalIsOpen(true);
         }
     };
 
@@ -99,6 +127,10 @@ const Reportes = () => {
                 <button onClick={closeModal}>Cerrar</button>
             </Modal>
 
+            <br></br>
+            <br></br>
+            <h3>Tiempo de consulta: {tiempoDeEspera} ms</h3>
+            <br></br>
             <div className="chart-container">
                 <BarChart data={data} />
             </div>

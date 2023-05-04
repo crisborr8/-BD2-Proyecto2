@@ -2,25 +2,31 @@ import React, { useState, useEffect } from "react";
 import './Insertar.css';
 import Modal from "react-modal"; 
 
+
 const Insertar = () => {
     const [cb_baseDatos, cb_setBaseDatos] = useState("");
     const [cb_habitacion, cb_setHabitacion] = useState("");
     const [cb_paciente, cb_setPaciente] = useState("");
+    const [cb_pagina, cb_setPagina] = useState("");
 
     const [baseDatos, setBaseDatos] = useState("");
     const [tipoRegistro, setTipoRegistro] = useState("");
     const [habitacion, setHabitacion] = useState("");
     const [paciente, setPaciente] = useState("");
+    const [pagina, setPagina] = useState("");
     const [descripcion, setDescripcion] = useState("");
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsOpen_actividad, setModalIsOpen_actividad] = useState(false);
     const [modalIsOpen_descripcion, setModalIsOpen_descripcion] = useState(false);
+    const [modalIsOpen_insertarError, setModalIsOpen_insertarError] = useState(false);
+    const [modalIsOpen_insertarExito, setModalIsOpen_insertarExito] = useState(false);
 
     const obtenerDatos = async () => {
         try {
-            var datos = ["MongoDB", "Cassandra", "MySql", "Redis"];
+            var datos = ["MongoDB", "Cassandra", "MySql"];
             setBaseDatos(datos)
+            setPagina(["1", "2", "3", "4", "5"])
         } catch (error) {
             console.error(error);
         }
@@ -51,19 +57,58 @@ const Insertar = () => {
         cb_setPaciente(e.target.value);
     };
 
+    const handlePaginaChange = (e) => {
+        cb_setPagina(e.target.value);
+        setPacientePage(e)
+    };
+
     const handleDescripcionChange = (e) => {
         setDescripcion(e.target.value);
     };
 
+    const setPacientePage = async (e) => {
+        try {
+            const response = await fetch(process.env.REACT_APP_API_URL + '/GetPacientes/'+e.target.value, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            const data = await response.json();
+            if (Array.isArray(data)){
+                setPaciente(data)
+            } else {
+                console.error(data)
+                return []
+            }
+        } catch (error) {
+            console.error(error);
+            return []
+        }
+    }
+
     const getHabitacionPaciente = async (e) => {
-        if (e === "logactividad"){
-            var datos = ["Habitacion a1", "Habitacion a2", "Habitacion a3", "Habitacion a4"];
-            setHabitacion(datos)
-            datos = ["Paciente 1", "Paciente 2"];
-            setPaciente(datos)
-        } else {
-            datos = ["Habitacion 1", "Habitacion 2", "Habitacion 3", "Habitacion 4"];
-            setHabitacion(datos)
+        try {
+            const response = await fetch(process.env.REACT_APP_API_URL + '/GetHabitaciones', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            const data = await response.json();
+            if (Array.isArray(data)){
+                if (e === "logactividad"){
+                    setHabitacion(data)
+                } else {
+                    setHabitacion(data)
+                }
+            } else {
+                console.error(data)
+                return []
+            }
+        } catch (error) {
+            console.error(error);
+            return []
         }
     }
 
@@ -75,30 +120,50 @@ const Insertar = () => {
             else if (tipoRegistro === "loghabitacion" && (cb_habitacion === "" || descripcion === "")){
                 setModalIsOpen_descripcion(true);
             } else {
-                alert("insertar")
                 try {
-                    const datos = {
-                        baseDatos,
-                        tipoRegistro,
-                        habitacion,
-                        paciente,
-                        descripcion
-                    };
-                    const response = await fetch("https://localhost:8080/insertar", {
-                        method: "POST",
-                        headers: {
-                        "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(datos),
-                    });
-                    if (!response.ok) {
-                        throw new Error("Error al obtener el reporte");
+                    let body = {}
+                    const fechaActual = new Date();
+                    const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+                    if (tipoRegistro === "logactividad"){
+                        body = {
+                            "base": cb_baseDatos.toLowerCase(),
+                            "tipo_registro": 0,
+                            "id_paciente": parseInt(cb_paciente),
+                            "edad": parseInt(paciente.find(p => p.id_paciente === parseInt(cb_paciente),).edad),
+                            "fecha": fechaFormateada,
+                            "habitacion": habitacion.find(p => p.id_habitacion === parseInt(cb_habitacion)).habitacion,
+                            "id_habitacion": parseInt(cb_habitacion),
+                            "genero": paciente.find(p => p.id_paciente === parseInt(cb_paciente)).genero,
+                            "descripcion": descripcion
+                        }
+                    } else {
+                        body = {
+                            "base": cb_baseDatos.toLowerCase(),
+                            "tipo_registro": 1,  
+                            "fecha": fechaFormateada,
+                            "habitacion": habitacion.find(p => p.id_habitacion === parseInt(cb_habitacion)).habitacion,
+                            "id_habitacion": parseInt(cb_habitacion),
+                            "descripcion": descripcion
+                        }
                     }
+                    const response = await fetch(process.env.REACT_APP_API_URL + '/insertar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body),
+                    });
                     const data = await response.json();
-                    return data;
+                    if (data["status"]){
+                        setModalIsOpen_insertarExito(true);
+                        setDescripcion("")
+                    } else{
+                        setModalIsOpen_insertarError(true);
+                    }
+                    console.log(data)
                 } catch (error) {
                     console.error(error);
-                    throw error;
+                    return []
                 }
             }
         } else {
@@ -116,6 +181,14 @@ const Insertar = () => {
     
     const closeModal_descripcion = () => {
         setModalIsOpen_descripcion(false);
+    }
+    
+    const closeModal_insertarError = () => {
+        setModalIsOpen_insertarError(false);
+    }
+    
+    const closeModal_insertarExito = () => {
+        setModalIsOpen_insertarExito(false);
     }
 
     return (
@@ -153,8 +226,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < habitacion.length; i++) {
                         options.push(
-                        <option key={i} value={habitacion[i]}>
-                            {habitacion[i]}
+                        <option key={i} value={habitacion[i].id_habitacion}>
+                            {habitacion[i].id_habitacion}-{habitacion[i].habitacion}
                         </option>
                         );
                     }
@@ -162,6 +235,22 @@ const Insertar = () => {
                     })()}
                 </select>
 
+                <label htmlFor="cb_pagina">Pagina:</label>
+                <select id="cb_pagina" value={cb_pagina} onChange={handlePaginaChange}>
+                    <option value="">Seleccione una pagina para obtener de la DB</option>
+                    {(() => {
+                    const options = [];
+                    for (let i = 0; i < pagina.length; i++) {
+                        options.push(
+                        <option key={i} value={pagina[i]}>
+                            {pagina[i]}
+                        </option>
+                        );
+                    }
+                    return options;
+                    })()}
+                </select>
+                
                 <label htmlFor="cb_paciente">Paciente:</label>
                 <select id="cb_paciente" value={cb_paciente} onChange={handlePacienteChange}>
                     <option value="">Seleccione un paciente</option>
@@ -169,8 +258,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < paciente.length; i++) {
                         options.push(
-                        <option key={i} value={paciente[i]}>
-                            {paciente[i]}
+                        <option key={i} value={paciente[i].id_paciente}>
+                            {paciente[i].id_paciente}-{paciente[i].genero}-{paciente[i].edad}
                         </option>
                         );
                     }
@@ -196,8 +285,8 @@ const Insertar = () => {
                     const options = [];
                     for (let i = 0; i < habitacion.length; i++) {
                         options.push(
-                        <option key={i} value={habitacion[i]}>
-                            {habitacion[i]}
+                        <option key={i} value={habitacion[i].id_habitacion}>
+                            {habitacion[i].id_habitacion}-{habitacion[i].habitacion}
                         </option>
                         );
                     }
@@ -232,6 +321,18 @@ const Insertar = () => {
                 <h2>Error</h2>
                 <p>Por favor seleccione una habitacion e ingrese una descripcion.</p>
                 <button onClick={closeModal_descripcion}>Cerrar</button>
+            </Modal>
+
+            <Modal isOpen={modalIsOpen_insertarExito} onRequestClose={closeModal_insertarExito} style={{content: {height: '200px'}}}>
+                <h2>Exito</h2>
+                <p>El log se ha ingresado con éxito.</p>
+                <button onClick={closeModal_insertarExito}>Cerrar</button>
+            </Modal>
+
+            <Modal isOpen={modalIsOpen_insertarError} onRequestClose={closeModal_insertarError} style={{content: {height: '200px'}}}>
+                <h2>Error</h2>
+                <p>Ha ocurrido un error inesperado, comuniquese con el administrador.</p>
+                <button onClick={closeModal_insertarError}>Cerrar</button>
             </Modal>
         </div>
     );
