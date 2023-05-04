@@ -1,0 +1,38 @@
+.insertar-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  
+  select {
+    height: 40px;
+  }
+  
+  textarea {
+    height: 100px;
+  }
+  
+  .log-fields {
+    display: none;
+  }
+  
+  .log-fields.active {
+    display: block;
+  }
